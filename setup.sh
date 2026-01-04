@@ -1,120 +1,109 @@
 #!/bin/bash
 
-# Stewie_it v1 - Quick Setup Script for Ubuntu/Debian
-# Run this script on your AWS EC2 or Ubuntu server
+# YouTube Content Automation - Quick Setup Script
 
-set -e  # Exit on error
+set -e
 
-echo "==================================="
-echo "Stewie_it v1 - Setup Script"
-echo "==================================="
+echo "=========================================="
+echo "YouTube Content Automation - Setup"
+echo "=========================================="
 echo ""
 
-# Check if running as root
-if [ "$EUID" -eq 0 ]; then
-   echo "Please do not run as root. Run as ubuntu or regular user."
-   exit 1
+# Check Python version
+echo "Checking Python version..."
+if ! command -v python3 &> /dev/null; then
+    echo "❌ Python 3 not found. Please install Python 3.9 or higher."
+    exit 1
 fi
 
-# Update system
-echo "Step 1: Updating system packages..."
-sudo apt update && sudo apt upgrade -y
+PYTHON_VERSION=$(python3 --version | cut -d' ' -f2 | cut -d'.' -f1,2)
+echo "✓ Python $PYTHON_VERSION found"
 
-# Install system dependencies
+# Check FFmpeg
 echo ""
-echo "Step 2: Installing system dependencies..."
-sudo apt install -y ffmpeg imagemagick wget unzip curl python3 python3-pip python3-venv
-
-# Install Google Chrome
-echo ""
-echo "Step 3: Installing Google Chrome..."
-if ! command -v google-chrome &> /dev/null; then
-    wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-    sudo dpkg -i google-chrome-stable_current_amd64.deb || sudo apt-get install -f -y
-    rm google-chrome-stable_current_amd64.deb
-    echo "Google Chrome installed successfully"
+echo "Checking FFmpeg..."
+if ! command -v ffmpeg &> /dev/null; then
+    echo "⚠️  FFmpeg not found. Installing..."
+    sudo apt update && sudo apt install -y ffmpeg
 else
-    echo "Google Chrome already installed"
+    echo "✓ FFmpeg found"
 fi
 
-# Install ChromeDriver
+# Check ImageMagick
 echo ""
-echo "Step 4: Installing ChromeDriver..."
-CHROME_VERSION=$(google-chrome --version | grep -oP '\d+' | head -1)
-echo "Detected Chrome version: $CHROME_VERSION"
-
-# Get the latest ChromeDriver version for this Chrome major version
-DRIVER_VERSION=$(curl -s "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${CHROME_VERSION}")
-echo "Installing ChromeDriver version: $DRIVER_VERSION"
-
-wget "https://chromedriver.storage.googleapis.com/${DRIVER_VERSION}/chromedriver_linux64.zip"
-unzip -o chromedriver_linux64.zip
-sudo mv chromedriver /usr/local/bin/
-sudo chmod +x /usr/local/bin/chromedriver
-rm chromedriver_linux64.zip
-echo "ChromeDriver installed successfully"
+echo "Checking ImageMagick..."
+if ! command -v convert &> /dev/null; then
+    echo "⚠️  ImageMagick not found. Installing..."
+    sudo apt install -y imagemagick
+else
+    echo "✓ ImageMagick found"
+fi
 
 # Create virtual environment
 echo ""
-echo "Step 5: Creating Python virtual environment..."
-python3 -m venv venv
-source venv/bin/activate
-
-# Install Python dependencies
-echo ""
-echo "Step 6: Installing Python packages..."
-pip install --upgrade pip
-pip install pydub moviepy selenium duckduckgo-search python-dotenv requests pillow
-
-# Create required directories
-echo ""
-echo "Step 7: Creating project directories..."
-mkdir -p audio_assests
-mkdir -p video_assests
-mkdir -p image_assests
-mkdir -p downloaded_images
-mkdir -p runtime_logs
-mkdir -p archives_audios
-
-# Create .env file if it doesn't exist
-if [ ! -f .env ]; then
-    echo ""
-    echo "Step 8: Creating .env file..."
-    cp .env.example .env
-    echo ".env file created from template"
-    echo "IMPORTANT: Edit .env file and add your Telegram credentials!"
+echo "Creating virtual environment..."
+if [ ! -d "venv" ]; then
+    python3 -m venv venv
+    echo "✓ Virtual environment created"
 else
-    echo ""
-    echo "Step 8: .env file already exists, skipping..."
+    echo "✓ Virtual environment already exists"
 fi
 
-# Verify installations
+# Activate venv and install dependencies
 echo ""
-echo "==================================="
-echo "Verifying installations..."
-echo "==================================="
-echo "FFmpeg: $(ffmpeg -version 2>&1 | head -1)"
-echo "ImageMagick: $(convert -version | head -1)"
-echo "Chrome: $(google-chrome --version)"
-echo "ChromeDriver: $(chromedriver --version)"
-echo "Python: $(python3 --version)"
+echo "Installing Python dependencies..."
+source venv/bin/activate
+pip install --upgrade pip
+pip install -r requirements.txt
+echo "✓ Dependencies installed"
+
+# Create directories
+echo ""
+echo "Creating directories..."
+mkdir -p output temp logs assets/music
+echo "✓ Directories created"
+
+# Create .env if doesn't exist
+if [ ! -f ".env" ]; then
+    echo ""
+    echo "Creating .env file..."
+    cp .env.example .env
+    echo "✓ .env file created"
+    echo ""
+    echo "⚠️  IMPORTANT: Edit .env and add your API keys!"
+    echo "   nano .env"
+else
+    echo ""
+    echo "✓ .env file already exists"
+fi
+
+# Make main.py executable
+chmod +x main.py
 
 echo ""
-echo "==================================="
-echo "Setup completed successfully!"
-echo "==================================="
+echo "=========================================="
+echo "✅ Setup completed successfully!"
+echo "=========================================="
 echo ""
 echo "Next steps:"
-echo "1. Edit .env file with your Telegram bot credentials:"
+echo ""
+echo "1. Get OpenAI API key:"
+echo "   https://platform.openai.com/api-keys"
+echo ""
+echo "2. Set up YouTube API:"
+echo "   - See SETUP.md for detailed instructions"
+echo "   - Download client_secrets.json"
+echo ""
+echo "3. Add your API keys to .env:"
 echo "   nano .env"
 echo ""
-echo "2. Add a gameplay video to video_assests/video_without_audio.webm"
+echo "4. Add topics to topics.txt:"
+echo "   nano topics.txt"
 echo ""
-echo "3. Update video path in flow_main.py (line 63) if needed"
-echo ""
-echo "4. Run the application:"
+echo "5. Run a test video:"
 echo "   source venv/bin/activate"
-echo "   python3 flow_main.py"
+echo "   python main.py --test"
 echo ""
-echo "For detailed instructions, see DEPLOYMENT_GUIDE.md"
-echo "==================================="
+echo "=========================================="
+echo "For detailed setup: See SETUP.md"
+echo "=========================================="

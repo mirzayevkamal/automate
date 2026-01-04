@@ -1,0 +1,183 @@
+# YouTube Content Automation - Configuration
+
+# ===== SCHEDULING =====
+schedule:
+  enabled: true
+  videos_per_day: 3
+  # Times to generate and upload videos (24-hour format)
+  upload_times:
+    - "09:00"
+    - "14:00"
+    - "20:00"
+  timezone: "UTC"  # Change to your timezone (e.g., "America/New_York")
+
+# ===== SCRIPT GENERATION =====
+script:
+  provider: "openai"  # Options: openai, anthropic, local
+  model: "gpt-4o-mini"  # gpt-4o-mini (cheap), gpt-4o (better quality)
+  max_tokens: 1500
+  temperature: 0.7
+
+  # Script style
+  style: "educational"  # Options: educational, entertaining, news, tutorial
+  target_length_seconds: 180  # Target video length (60-600 seconds)
+  tone: "friendly"  # Options: friendly, professional, casual, energetic
+
+  # Include elements
+  include_hook: true  # Attention-grabbing intro
+  include_cta: true   # Call to action at end
+  include_chapters: false  # Segment markers
+
+# ===== VOICE GENERATION =====
+voice:
+  provider: "openai"  # Options: openai, elevenlabs, gtts (free)
+
+  # OpenAI TTS settings
+  openai:
+    model: "tts-1"  # tts-1 (faster/cheaper) or tts-1-hd (better quality)
+    voice: "nova"   # alloy, echo, fable, onyx, nova, shimmer
+    speed: 1.0      # 0.25 to 4.0
+
+  # ElevenLabs settings (premium)
+  elevenlabs:
+    voice_id: "21m00Tcm4TlvDq8ikWAM"  # Rachel voice
+    model: "eleven_monolingual_v1"
+    stability: 0.5
+    similarity_boost: 0.75
+
+  # Google TTS (free)
+  gtts:
+    language: "en"
+    slow: false
+
+# ===== VIDEO CREATION =====
+video:
+  resolution: [1920, 1080]  # 1080p
+  fps: 30
+  format: "mp4"
+  codec: "libx264"
+
+  # Visual style
+  style: "stock_footage"  # Options: stock_footage, simple_text, code_tutorial, slideshow
+
+  # Background
+  background:
+    type: "stock"  # Options: stock, gradient, solid, image
+    stock_source: "pexels"  # pexels, pixabay
+    gradient_colors: ["#667eea", "#764ba2"]  # If type=gradient
+    solid_color: "#000000"  # If type=solid
+
+  # Text/Subtitles
+  subtitles:
+    enabled: true
+    style: "word_by_word"  # Options: word_by_word, sentence, none
+    font: "Arial-Bold"
+    font_size: 80
+    color: "yellow"
+    stroke_color: "black"
+    stroke_width: 2
+    position: "center"  # top, center, bottom
+
+  # Intro/Outro
+  intro:
+    enabled: true
+    duration: 3
+    text: "Your Channel Name"
+  outro:
+    enabled: true
+    duration: 3
+    text: "Subscribe for more!"
+
+  # Background music
+  music:
+    enabled: false
+    volume: 0.1  # 0.0 to 1.0
+    file: "assets/music/background.mp3"
+
+# ===== YOUTUBE UPLOAD =====
+youtube:
+  enabled: true
+
+  # Default metadata
+  category_id: "28"  # 28=Science & Technology
+  language: "en"
+  privacy_status: "public"  # public, unlisted, private
+
+  # SEO
+  title_template: "{topic} | {year}"
+  description_template: |
+    {transcript}
+
+    ---
+
+    🔔 Subscribe for daily content!
+    👍 Like if you found this helpful!
+    💬 Comment your thoughts below!
+
+    #tutorial #education #learning
+
+  tags_auto_generate: true
+  tags_additional:
+    - "tutorial"
+    - "education"
+    - "learning"
+
+  # Thumbnail
+  thumbnail:
+    auto_generate: true
+    style: "simple"  # simple, template
+    font_size: 120
+    background_color: "#667eea"
+
+# ===== TOPIC MANAGEMENT =====
+topics:
+  file: "topics.txt"
+  shuffle: false  # Randomize topic order
+  repeat_when_exhausted: true  # Start over when all topics used
+
+  # Topic expansion (AI generates variations)
+  expand_topics: false
+  expansions_per_topic: 3
+
+# ===== SYSTEM =====
+system:
+  output_dir: "output"
+  logs_dir: "logs"
+  temp_dir: "temp"
+
+  # Cleanup
+  keep_videos: true  # Keep generated MP4 files
+  keep_audio: false  # Keep intermediate audio files
+  cleanup_after_upload: false  # Delete video after successful upload
+
+  # Retry logic
+  max_retries: 3
+  retry_delay: 60  # seconds
+
+  # Logging
+  log_level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  log_to_file: true
+  log_to_console: true
+
+# ===== NOTIFICATIONS =====
+notifications:
+  enabled: false
+
+  # Email
+  email:
+    enabled: false
+    smtp_server: "smtp.gmail.com"
+    smtp_port: 587
+    from_email: "your-email@gmail.com"
+    to_email: "your-email@gmail.com"
+    # Set SMTP_PASSWORD in .env
+
+  # Telegram
+  telegram:
+    enabled: false
+    # Set TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID in .env
+
+  # Discord webhook
+  discord:
+    enabled: false
+    # Set DISCORD_WEBHOOK_URL in .env

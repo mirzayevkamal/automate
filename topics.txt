@@ -1,0 +1,15 @@
+# YouTube Video Topics
+# One topic per line
+# Lines starting with # are ignored
+# The system will generate one video per topic
+
+How to learn Python programming for beginners
+5 essential JavaScript tips every developer should know
+Understanding REST APIs in 5 minutes
+Docker explained for beginners
+Git and GitHub tutorial for new developers
+What is machine learning and how does it work
+CSS Flexbox vs Grid - Which one to use
+React hooks explained simply
+Introduction to TypeScript
+SQL basics every programmer needs to know
