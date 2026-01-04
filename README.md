@@ -1,135 +1,171 @@
-# Stewie_it v1
+# YouTube Content Automation System
 
-## 🎥 **DEMO AUTO GENERATED VIDEO — [WATCH ON INSTAGRAM](https://www.instagram.com/stewie_codes_absurd/)**
+**Fully automated AI-powered YouTube content creation and publishing**
 
-**Stewie_it v1** is an experimental automation project inspired by a viral Instagram trend where Stewie and Peter Griffin humorously explain coding topics over gameplay footage (recent trend)
+## What It Does
 
-This project automates assembling these videos by combining user-provided scripts, AI-scraped voices, character images, and gameplay background, then sending them to user.
+1. ✅ You provide a list of topics
+2. ✅ AI generates engaging scripts automatically
+3. ✅ AI creates professional voiceovers
+4. ✅ System creates videos with visuals and subtitles
+5. ✅ Auto-uploads to YouTube on schedule
+6. ✅ Runs X times per day (configurable)
 
-> ⚠️ This is an experimental project, created for fun and educational purposes. It uses tricks like scraping voices and rotating IPs via AWS EC2.
----
+## Features
 
-## 🎥 Example Video Format
+- 🤖 **AI Script Generation** - Uses OpenAI GPT to create engaging content
+- 🎙️ **AI Voice Generation** - Multiple TTS options (OpenAI, ElevenLabs, free)
+- 🎬 **Automatic Video Creation** - Stock footage + animated subtitles
+- 📺 **YouTube Auto-Upload** - SEO-optimized titles and descriptions
+- ⏰ **Scheduled Publishing** - Set how many videos per day
+- 📊 **Topic Management** - Queue system ensures all topics are covered
+- 🔄 **Retry Logic** - Handles failures gracefully
+- 📝 **Full Logging** - Track everything that happens
 
-| ![Stewie](image_assests/stewie.png) | ![Peter](image_assests/peter.png) |
-|:----------------------------------------:|:-------------------------------------:|
-| **Stewie** explains a coding concept with AI voiceover | **Peter** reacts or adds commentary with AI voiceover |
-| Meanwhile, gameplay footage plays in the background |
+## Quick Start
 
----
+### 1. Install Dependencies
 
-## 🧠 How It Works
+```bash
+pip install -r requirements.txt
+```
 
+### 2. Configure Topics
+
+Edit `topics.txt` - one topic per line:
+
+```
+How to learn Python programming
+5 JavaScript tips for beginners
+Understanding REST APIs
+Docker for developers
+```
+
+### 3. Set Up Credentials
+
+Copy `.env.example` to `.env` and add:
+
+- OpenAI API key (for script generation)
+- YouTube credentials (for uploading)
+- Optional: ElevenLabs API key (for better voices)
+
+### 4. Configure Schedule
+
+Edit `config.yaml`:
+
+```yaml
+videos_per_day: 3  # How many videos to generate per day
+upload_times: ["09:00", "14:00", "20:00"]  # When to upload
+```
+
+### 5. Run
+
+**One-time test:**
+```bash
+python main.py --test
+```
+
+**Schedule (runs continuously):**
+```bash
+python main.py --schedule
+```
+
+**Or use cron:**
+```bash
+crontab -e
+# Add: 0 9,14,20 * * * cd /path/to/project && python main.py --run-once
+```
 
 ## Architecture
 
-![Architecture Diagram](image_assests/aws_diagram.jpg)
+```
+Topics List → Script Generator → Voice Generator → Video Creator → YouTube Uploader
+     ↓              ↓                   ↓                ↓              ↓
+  topics.txt    OpenAI API         TTS Service      MoviePy        YouTube API
+```
 
-### 1. Script Input via Telegram  
-- The user sends a coding topic or full dialogue script to the Telegram bot.  
-- The bot expects a back-and-forth conversation format alternating between Stewie and Peter lines.  
-- Users can optionally generate or fetch scripts using ChatGPT externally and paste them in.
+## Cost Estimate
 
-### 🧠 Telegram Interface
+**Minimal setup (Free tier):**
+- Script: OpenAI API ~$0.01/video
+- Voice: Free TTS (gTTS)
+- Video: Free (MoviePy + Pexels)
+- Upload: Free (YouTube API)
+- **Total: ~$0.30/month for 30 videos**
 
-Here’s how you interact with the bot via Telegram:
+**Premium setup:**
+- Script: OpenAI GPT-4 ~$0.10/video
+- Voice: ElevenLabs ~$0.30/video
+- **Total: ~$12/month for 30 videos**
 
-| ![Telegram Screen 1](image_assests/telegram_screenshot2.png) | ![Telegram Screen 2](image_assests/telegram_screenshot1.png) |
-|:--------------------------------------------------------:|:--------------------------------------------------------:|
-| Telegram: Send content or prompts                        | Telegram: Get auto-generated video file                  |
+## Video Styles
 
+Choose from:
 
-### 2. Voice Generation  
-- Voices are scraped from [Parrot AI](https://parrot.ai/) by spinning up an AWS EC2 instance that:  
-  - Launches, scrapes voice clips for the dialogue, then shuts down automatically.  
-- AWS **CloudWatch Events + Lambda** handle EC2 lifecycle management to rotate IP addresses and avoid bans.
+1. **Simple Text** - Animated text on gradient background
+2. **Stock Footage** - Auto-fetched from Pexels/Pixabay
+3. **Code Tutorials** - Syntax-highlighted code snippets
+4. **Slideshow** - AI-generated images + narration
 
-### 3. Image & Asset Collection  
-- Character images (`stewie.png`, `peter.png`) are stored locally.  
-- Gameplay footage videos are pre-stored, you can add any footage in reel size video in video assests folder 
-- DuckDuckGo scraping is used to find additional relevant images if needed.
+Configure in `config.yaml`
 
-### 4. Video Assembly  
-- Using Python’s `moviepy`, the audio clips, character images, and gameplay footage are synchronized and combined into the final video.  
-- Each dialogue line is paired with the corresponding character’s image and AI voice clip.
-
-### 5. Telegram Monitoring  
-- The Telegram bot notifies users about job status, errors, or when the video is ready.  
-- Users can send new scripts or topics directly to the bot.
-
-### 6. Telegram Delivery  
-- When the video is ready, it is **sent directly back to the Telegram user**.
-- You always receive your video, even if posting fails.
-
-### 7. (Optional) Instagram Auto-Posting  
-- Auto-posting is available via **Instagram Graph API**.
-- Since IP address changes with EC2, this is best handled via a **cron job** if a valid session/IP is known.
-- You can also manually post using the Telegram-delivered video.
-## ⚙️ Requirements
+## Requirements
 
 - Python 3.9+
-- AWS account with:
-  - EC2 instance for voice scraping
-  - CloudWatch + Lambda to manage EC2 lifecycle and IP rotation
-- Telegram Bot Token
-- OpenAI API key (optional, for manual ChatGPT use outside project)
+- FFmpeg
+- ImageMagick
+- 2GB RAM minimum
+- Internet connection
 
+## Directory Structure
 
+```
+youtube-automation/
+├── main.py                 # Entry point
+├── config.yaml            # Configuration
+├── topics.txt             # Your topics list
+├── .env                   # API keys (create from .env.example)
+├── modules/
+│   ├── script_generator.py    # AI script creation
+│   ├── voice_generator.py     # TTS
+│   ├── video_creator.py       # Video assembly
+│   ├── youtube_uploader.py    # Upload to YouTube
+│   └── scheduler.py           # Job scheduling
+├── templates/             # Script templates
+├── assets/               # Fonts, backgrounds, music
+├── output/              # Generated videos
+└── logs/                # Execution logs
+```
 
-## 📄 Sample Content Format
+## Example Output
 
-Below is an example of how the script content is structured to generate the videos. The `audio` field paths are managed internally and are omitted here for privacy.
+**Input topic:** "How to learn Python programming"
 
-```json
-[
-  {
-    "audio": "[path to Peter's audio clip]",
-    "image": "peter.png",
-    "dialogue": "Peter: Hello Indian dev! You’ve seen reels like this, right?",
-    "character": "peter",
-    "image_search": "indian developer"
-  },
-  {
-    "audio": "[path to Stewie's audio clip]",
-    "image": "stewie.png",
-    "dialogue": "Stewie: Yeah! Those viral AI voice skits? Everyone’s reposting this one.",
-    "character": "stewie",
-    "image_search": "viral ai reel"
-  },
-  {
-    "audio": "[path to Peter's audio clip]",
-    "image": "peter.png",
-    "dialogue": "Peter: I built the automation for this. No paid AI, all open source!",
-    "character": "peter",
-    "image_search": "automation setup"
-  }
-]
+**Generated script:** 2-3 minute educational script
+**Voice:** Natural-sounding AI narration
+**Video:**
+- Animated title sequence
+- Stock footage or code snippets
+- Word-by-word subtitles
+- Outro with CTA
 
+**YouTube:**
+- Title: "How to Learn Python Programming in 2026 | Complete Beginner's Guide"
+- Description: Full transcript + resources
+- Tags: Auto-generated SEO tags
+- Thumbnail: Auto-generated
 
-## System Requirements
+## Customization
 
-Before running the script, make sure the following system-level dependencies are installed:
+All customizable via `config.yaml`:
 
-### 🧰 Required Packages
+- Video length (30s - 15min)
+- Voice style (male/female, speed, accent)
+- Visual style (minimal, rich, code-focused)
+- Upload schedule
+- SEO settings
+- More...
 
-- **FFmpeg**: Required by `moviepy` and `pydub` for audio/video processing.
-- **ImageMagick**: Used for image manipulation and required for certain operations by `moviepy` or `imageio`.
-- **imageio**: Python library used for reading/writing images, often works with `moviepy`.
+## License
 
----
-
-### 📦 Install on Ubuntu/Debian
-
-```bash
-sudo apt update
-sudo apt install ffmpeg imagemagick
-pip install imageio
-
-
-
-## ⚙️ Setup & Running
-
-- The main automation service runs via `flow_main.py`.  
-- Run it as a background service or use process managers like `systemd`, `pm2`, or `screen`/`tmux` to keep it alive.  
-- This script keeps the Telegram bot live and handles the entire workflow end-to-end.
-
+MIT - Use freely for your YouTube channel!
