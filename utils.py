@@ -70,4 +70,79 @@ class Utils:
         except Exception as e:
             print(f"[Utils] Error archiving audio assets: {e}")
 
+    @staticmethod
+    def generate_video_title(dialogue_data):
+        """
+        Generate YouTube-optimized title from dialogue content
+
+        Args:
+            dialogue_data (list): List of dialogue dictionaries
+
+        Returns:
+            str: YouTube video title (max 100 chars)
+        """
+        if dialogue_data and len(dialogue_data) > 0:
+            first_line = dialogue_data[0].get('sentence', '')
+            # Extract topic after character name (Peter: or Stewie:)
+            if ':' in first_line:
+                topic = first_line.split(':', 1)[-1].strip()
+            else:
+                topic = first_line.strip()
+
+            # Truncate to ~60 chars for optimal YouTube SEO
+            if len(topic) > 60:
+                topic = topic[:57] + "..."
+
+            return f"{topic} | Stewie & Peter Explain"
+
+        return "Coding Tutorial | Stewie & Peter Explain"
+
+    @staticmethod
+    def generate_video_description(dialogue_data):
+        """
+        Generate YouTube description from dialogue content
+
+        Args:
+            dialogue_data (list): List of dialogue dictionaries
+
+        Returns:
+            str: YouTube video description (max 5000 chars)
+        """
+        description_parts = [
+            "🎮 Stewie and Peter explain coding concepts in a fun and engaging way!",
+            "",
+            "📝 Transcript:",
+            ""
+        ]
+
+        # Add all dialogue lines
+        for item in dialogue_data:
+            sentence = item.get('sentence', '')
+            if sentence:
+                description_parts.append(sentence)
+
+        # Add footer with call-to-action and hashtags
+        description_parts.extend([
+            "",
+            "---",
+            "🔔 Subscribe for more coding tutorials!",
+            "💬 Follow us on Instagram: @stewie_codes_absurd",
+            "👍 Like this video if you learned something new!",
+            "💭 Comment what topic we should cover next!",
+            "",
+            "📚 More Resources:",
+            "• GitHub: [Add your GitHub link]",
+            "• Discord: [Add your Discord link]",
+            "",
+            "#coding #programming #tutorial #tech #education #python #javascript #webdev #learntocode #softwaredevelopment"
+        ])
+
+        description = "\n".join(description_parts)
+
+        # Ensure description doesn't exceed YouTube's 5000 char limit
+        if len(description) > 5000:
+            description = description[:4997] + "..."
+
+        return description
+
 # Utils.archive_audio_assets()
